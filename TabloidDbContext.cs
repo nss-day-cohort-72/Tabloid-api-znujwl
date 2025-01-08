@@ -10,6 +10,9 @@ public class TabloidDbContext : IdentityDbContext<IdentityUser>
 
     public DbSet<UserProfile> UserProfiles { get; set; }
 
+    public DbSet<Post> Posts { get; set; }
+public DbSet<Category> Categories { get; set; }
+
 
     public TabloidDbContext(DbContextOptions<TabloidDbContext> context, IConfiguration config) : base(context)
     {
@@ -20,12 +23,116 @@ public class TabloidDbContext : IdentityDbContext<IdentityUser>
     {
         base.OnModelCreating(modelBuilder);
 
+         // Define the one-to-one relationship between UserProfile and IdentityUser
+    modelBuilder.Entity<UserProfile>()
+        .HasOne(up => up.IdentityUser) // Navigation property in UserProfile
+        .WithOne()                     // IdentityUser has no back-reference to UserProfile
+        .HasForeignKey<UserProfile>(up => up.IdentityUserId); // Foreign key in UserProfile
+
+        modelBuilder.Entity<Post>()
+    .HasOne(p => p.Author)
+    .WithMany() // Assuming a one-to-many relationship
+    .HasForeignKey(p => p.AuthorId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+
         modelBuilder.Entity<IdentityRole>().HasData(new IdentityRole
         {
             Id = "c3aaeb97-d2ba-4a53-a521-4eea61e59b35",
             Name = "Admin",
             NormalizedName = "admin"
         });
+
+   // Seed categories
+    modelBuilder.Entity<Category>().HasData(
+        new Category { Id = 1, Name = "Technology" },
+        new Category { Id = 2, Name = "Science" },
+        new Category { Id = 3, Name = "Lifestyle" },
+        new Category { Id = 4, Name = "Politics" },
+        new Category { Id = 5, Name = "Health" },
+        new Category { Id = 6, Name = "Entertainment" }
+    );
+
+    // Seed posts
+    modelBuilder.Entity<Post>().HasData(
+        new Post
+        {
+            Id = 1,
+            Title = "Exploring the Future of AI",
+            Content = "Artificial Intelligence is transforming the world...",
+            HeaderImageUrl = "https://example.com/ai.jpg",
+            CreateDateTime = new DateTime(2023, 7, 15),
+            PublishDateTime = new DateTime(2023, 7, 20),
+            CategoryId = 1,
+            AuthorId = 1
+        },
+        new Post
+        {
+            Id = 2,
+            Title = "The Wonders of Space Exploration",
+            Content = "Space exploration has always fascinated humankind...",
+            HeaderImageUrl = "https://example.com/space.jpg",
+            CreateDateTime = new DateTime(2023, 6, 10),
+            PublishDateTime = new DateTime(2023, 6, 15),
+            CategoryId = 2,
+            AuthorId = 2
+        },
+        new Post
+        {
+            Id = 3,
+            Title = "10 Tips for a Healthy Lifestyle",
+            Content = "Maintaining a healthy lifestyle is easier than you think...",
+            HeaderImageUrl = "https://example.com/lifestyle.jpg",
+            CreateDateTime = new DateTime(2023, 5, 20),
+            PublishDateTime = new DateTime(2023, 5, 25),
+            CategoryId = 3,
+            AuthorId = 3
+        },
+        new Post
+        {
+            Id = 4,
+            Title = "Politics in the Modern World",
+            Content = "Understanding the ever-changing landscape of global politics.",
+            HeaderImageUrl = "https://example.com/politics.jpg",
+            CreateDateTime = new DateTime(2023, 4, 12),
+            PublishDateTime = new DateTime(2023, 4, 15),
+            CategoryId = 4,
+            AuthorId = 1
+        },
+        new Post
+        {
+            Id = 5,
+            Title = "Entertainment Trends in 2023",
+            Content = "Explore the latest movies, music, and entertainment trends.",
+            HeaderImageUrl = "https://example.com/entertainment.jpg",
+            CreateDateTime = new DateTime(2023, 3, 20),
+            PublishDateTime = new DateTime(2023, 3, 25),
+            CategoryId = 6,
+            AuthorId = 1
+        },
+          new Post
+    {
+        Id = 6,
+        Title = "Advancements in Quantum Computing",
+        Content = "Quantum computing is set to revolutionize technology.",
+        HeaderImageUrl = "https://example.com/quantum.jpg",
+        CreateDateTime = new DateTime(2023, 8, 15),
+        PublishDateTime = new DateTime(2023, 8, 20),
+        CategoryId = 1,
+        AuthorId = 1
+    },
+    new Post
+    {
+        Id = 7,
+        Title = "The Rise of Renewable Energy",
+        Content = "Renewable energy sources are becoming mainstream.",
+        HeaderImageUrl = "https://example.com/renewable.jpg",
+        CreateDateTime = new DateTime(2023, 9, 5),
+        PublishDateTime = new DateTime(2023, 9, 10),
+        CategoryId = 2,
+        AuthorId = 1
+    });
+
 
         modelBuilder.Entity<IdentityUser>().HasData(new IdentityUser[]
         {
