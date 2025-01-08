@@ -96,4 +96,90 @@ public class UserProfileController : ControllerBase
         user.UserName = user.IdentityUser.UserName;
         return Ok(user);
     }
+
+    [HttpPost("deactivate/{id}")]
+    [Authorize(Roles = "Admin")]
+    public IActionResult Deactivate(int id)
+    {
+        var user = _dbContext.UserProfiles.SingleOrDefault(up => up.Id == id);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        user.IsActive = false;
+        _dbContext.SaveChanges();
+
+        Console.WriteLine($"User with ID {id} successfully deactivated. IsActive: {user.IsActive}");
+
+        return NoContent();
+    }
+
+    [HttpPost("reactivate/{id}")]
+    [Authorize(Roles = "Admin")]
+    public IActionResult Reactivate(int id)
+    {
+        var user = _dbContext.UserProfiles.SingleOrDefault(up => up.Id == id);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        user.IsActive = true;
+        _dbContext.SaveChanges();
+
+        Console.WriteLine($"User with ID {id} successfully reactivated. IsActive: {user.IsActive}");
+
+        return NoContent();
+    }
+
+    [HttpGet("deactivated")]
+    [Authorize(Roles = "Admin")]
+    public IActionResult GetDeactivatedUsers()
+    {
+        var deactivatedUsers = _dbContext.UserProfiles
+            .Where(up => up.IsActive == false)
+            .ToList();
+
+    Console.WriteLine($"Fetched {deactivatedUsers.Count} deactivated users.");
+
+
+        return Ok(deactivatedUsers);
+    }
+
+[HttpGet("active")]
+[Authorize(Roles = "Admin")]
+public IActionResult GetActiveUsers()
+{
+    var activeUsers = _dbContext.UserProfiles
+        .Include(up => up.IdentityUser)
+        .Where(up => up.IsActive == true)
+        .Select(up => new
+        {
+            Id = up.Id,
+            FirstName = up.FirstName,
+            LastName = up.LastName,
+            Email = up.IdentityUser.Email,
+            UserName = up.IdentityUser.UserName,
+            IdentityUserId = up.IdentityUserId,
+            Roles = _dbContext.UserRoles
+                .Where(ur => ur.UserId == up.IdentityUserId)
+                .Select(ur => _dbContext.Roles
+                    .SingleOrDefault(r => r.Id == ur.RoleId).Name)
+                .ToList()
+        })
+        .ToList();
+
+    Console.WriteLine($"Fetched {activeUsers.Count} active users.");
+    return Ok(activeUsers);
+}
+
+
+
+
+
+
+
 }

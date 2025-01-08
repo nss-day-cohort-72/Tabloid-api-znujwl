@@ -34,6 +34,9 @@ public class UserProfile
 
     public IdentityUser IdentityUser { get; set; }
 
+
+    public bool? IsActive { get; set; } = true; // Default to active
+
     public string FullName
     {
         get
